@@ -3,61 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Game Hub 💫</title>
+<title>Mini Game Run</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#0f111a;
-color:#eaeaea;
-overflow:hidden;
-}
-
-h1{
-text-align:center;
-font-size:18px;
-margin:10px;
-opacity:0.8;
-}
-
-#menu{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:8px;
-padding:10px;
-}
-
-.item{
-background:#1b1f2e;
-padding:12px;
-border-radius:10px;
-font-size:11px;
-text-align:center;
-user-select:none;
-transition:0.2s;
-}
-.item:active{transform:scale(0.95);}
-
-.screen{display:none;height:100vh;}
-.active{display:block;}
-
-.back{
-position:fixed;
-top:10px;
-left:10px;
-background:#333;
-border:none;
+background:#0e0f14;
 color:white;
-padding:8px;
-border-radius:8px;
-z-index:10;
+overflow:hidden;
 }
 
-#gameArea{
+.center{
 height:100vh;
-position:relative;
-overflow:hidden;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+
+button{
+padding:12px 18px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#2a2f44;
+color:white;
+font-size:14px;
 }
 
 .obj{
@@ -68,277 +41,209 @@ border-radius:50%;
 background:#ff4d6d;
 }
 
-.btn{
-padding:10px;
-margin:5px;
-border:none;
-border-radius:8px;
-background:#2a2f44;
-color:white;
+#no{
+position:absolute;
+background:#555;
 }
+
+h2,h3{margin:10px;}
 </style>
 </head>
 
 <body>
 
-<!-- HOME -->
-<div class="screen active" id="home">
-<h1>Mini Game Hub 🎮</h1>
-
-<div id="menu">
-<div class="item" onclick="start(1)">🎯 Тап цели</div>
-<div class="item" onclick="start(2)">💖 Клик сердца</div>
-<div class="item" onclick="start(3)">⚡ Реакция</div>
-<div class="item" onclick="start(4)">🟡 Уклонение</div>
-<div class="item" onclick="start(5)">👆 Счетчик</div>
-<div class="item" onclick="start(6)">🎲 Шанс</div>
-<div class="item" onclick="start(7)">🧠 Память</div>
-<div class="item" onclick="start(8)">📦 Поймай</div>
-<div class="item" onclick="start(9)">🔵 След</div>
-<div class="item" onclick="start(10)">🧩 Выбор</div>
-<div class="item" onclick="start(11)">🎮 Удержи</div>
-<div class="item" onclick="start(12)">🟢 Попади</div>
-<div class="item" onclick="start(13)">🔴 Ловкость</div>
-<div class="item" onclick="start(14)">💡 Быстро</div>
-<div class="item" onclick="start(15)">🏁 Финал</div>
-</div>
+<div id="menu" class="center">
+<h2>Mini Game Run 🎮</h2>
+<p>15 игр подряд без меню</p>
+<button onclick="startGame()">START</button>
 </div>
 
-<!-- GAME -->
-<div class="screen" id="game">
-<button class="back" onclick="back()">←</button>
-<div id="gameArea"></div>
-</div>
+<div id="game" style="display:none; height:100vh; position:relative;"></div>
 
 <script>
 
-let gameArea=document.getElementById("gameArea");
+let game = document.getElementById("game");
+let menu = document.getElementById("menu");
 
-function start(n){
-document.getElementById("home").classList.remove("active");
-document.getElementById("game").classList.add("active");
-gameArea.innerHTML="";
+let i = 1;
 
-if(n===1 tap());
-if(n===2 hearts());
-if(n===3 reaction());
-if(n===4 dodge());
-if(n===5 counter());
-if(n===6 luck());
-if(n===7 memory());
-if(n===8 catchGame());
-if(n===9 follow());
-if(n===10 choose());
-if(n===11 hold());
-if(n===12 aim());
-if(n===13 agility());
-if(n===14 fast());
-if(n===15 final());
+function startGame(){
+menu.style.display="none";
+game.style.display="block";
+i=1;
+next();
 }
 
-function back(){
-document.getElementById("home").classList.add("active");
-document.getElementById("game").classList.remove("active");
-gameArea.innerHTML="";
+function next(){
+game.innerHTML="";
+if(i>15){
+game.innerHTML="<div class='center'><h2>Финиш 🏁</h2><p>Готово</p></div>";
+return;
 }
 
-/* 1 TAP */
-function tap(){
-spawnTarget();
-function spawnTarget(){
-let d=document.createElement("div");
-d.className="obj";
-d.style.background="white";
-d.style.left=Math.random()*80+"vw";
-d.style.top=Math.random()*80+"vh";
-
-d.onclick=()=>{
-d.remove();
-spawnTarget();
+run(i);
+i++;
 }
 
-gameArea.appendChild(d);
-}
-}
+/* =====================
+   15 РАЗНЫХ ИГР
+===================== */
 
-/* 2 HEARTS (КЛИКАБЕЛЬНЫЕ) */
-function hearts(){
-for(let i=0;i<10;i++){
-let h=document.createElement("div");
-h.className="obj";
-h.style.background="red";
-h.style.left=Math.random()*85+"vw";
-h.style.top=Math.random()*85+"vh";
+function run(n){
 
-h.onclick=()=>h.remove();
-
-gameArea.appendChild(h);
-}
+// 1 TAP
+if(n===1){
+spawnTap();
 }
 
-/* 3 REACTION */
-function reaction(){
-let start=Date.now();
-gameArea.innerHTML="<h3 style='text-align:center;margin-top:200px'>ЖМИ!</h3>";
-
-gameArea.onclick=()=>{
-let ms=Date.now()-start;
-gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>"+ms+" ms</h2>";
-};
-}
-
-/* 4 DODGE */
-function dodge(){
-let b=document.createElement("div");
-b.className="obj";
-b.style.background="#ffd166";
-
-gameArea.appendChild(b);
-
-setInterval(()=>{
-b.style.left=Math.random()*85+"vw";
-b.style.top=Math.random()*85+"vh";
-},700);
-}
-
-/* 5 COUNTER */
-function counter(){
-let c=0;
-gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>0</h2>";
-
-gameArea.onclick=()=>{
-c++;
-gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>"+c+"</h2>";
-};
-}
-
-/* 6 LUCK */
-function luck(){
-gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>Нажми</h2>";
-
-gameArea.onclick=()=>{
-let r=Math.random();
-gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>"+(r>0.5?"WIN":"LOSE")+"</h2>";
-};
-}
-
-/* 7 MEMORY */
-function memory(){
-gameArea.innerHTML="<h3 style='text-align:center;margin-top:200px'>Запомни цвет</h3>";
-setTimeout(()=>{
-let c=["red","blue","green","yellow"][Math.floor(Math.random()*4)];
-gameArea.style.background=c;
-
-setTimeout(()=>{
-gameArea.style.background="#0f111a";
-gameArea.onclick=()=>alert("Какой был цвет?");
-},1000);
-},1000);
-}
-
-/* 8 CATCH */
-function catchGame(){
-for(let i=0;i<5;i++){
-let o=document.createElement("div");
-o.className="obj";
-o.style.background="cyan";
-o.style.left=Math.random()*85+"vw";
-o.style.top=Math.random()*85+"vh";
+// 2 HEARTS
+if(n===2){
+for(let k=0;k<8;k++){
+let o=createObj("red");
 o.onclick=()=>o.remove();
-gameArea.appendChild(o);
+game.appendChild(o);
 }
+setTimeout(next,3000);
 }
 
-/* 9 FOLLOW */
-function follow(){
-let o=document.createElement("div");
-o.className="obj";
-o.style.background="lime";
+// 3 REACTION
+if(n===3){
+let t=Date.now();
+game.innerHTML="<div class='center'><h3>ЖМИ</h3></div>";
+game.onclick=()=>{
+game.innerHTML="<div class='center'><h2>"+(Date.now()-t)+" ms</h2></div>";
+setTimeout(next,1500);
+};
+}
 
+// 4 DODGE
+if(n===4){
+let o=createObj("yellow");
+setInterval(()=>{
+o.style.left=Math.random()*80+"vw";
+o.style.top=Math.random()*80+"vh";
+},600);
+setTimeout(next,4000);
+}
+
+// 5 COUNTER
+if(n===5){
+let c=0;
+game.innerHTML="<div class='center'><h2>0</h2></div>";
+game.onclick=()=>{
+c++;
+game.innerHTML="<div class='center'><h2>"+c+"</h2></div>";
+};
+setTimeout(next,4000);
+}
+
+// 6 LUCK
+if(n===6){
+game.innerHTML="<div class='center'><h3>Нажми</h3></div>";
+game.onclick=()=>{
+game.innerHTML="<div class='center'><h2>"+(Math.random()>0.5?"WIN":"LOSE")+"</h2></div>";
+setTimeout(next,1500);
+};
+}
+
+// 7 MEMORY
+if(n===7){
+let colors=["red","blue","green","yellow"];
+let c=colors[Math.floor(Math.random()*4)];
+game.style.background=c;
+setTimeout(()=>{
+game.style.background="#0e0f14";
+game.innerHTML="<div class='center'><h3>Запомни был цвет</h3></div>";
+setTimeout(next,2000);
+},1000);
+}
+
+// 8 CATCH
+if(n===8){
+for(let k=0;k<5;k++){
+let o=createObj("cyan");
+o.onclick=()=>o.remove();
+game.appendChild(o);
+}
+setTimeout(next,3000);
+}
+
+// 9 FOLLOW
+if(n===9){
+let o=createObj("lime");
 document.onmousemove=(e)=>{
 o.style.left=e.clientX+"px";
 o.style.top=e.clientY+"px";
 };
-
-gameArea.appendChild(o);
+setTimeout(()=>{
+document.onmousemove=null;
+next();
+},4000);
 }
 
-/* 10 CHOOSE */
-function choose(){
-gameArea.innerHTML=`
-<button class='btn'>A</button>
-<button class='btn'>B</button>
-<button class='btn'>C</button>
-`;
-
+// 10 CHOICE
+if(n===10){
+game.innerHTML=`
+<div class="center">
+<button onclick="next()">A</button>
+<button onclick="next()">B</button>
+<button onclick="next()">C</button>
+</div>`;
 }
 
-/* 11 HOLD */
-function hold(){
-gameArea.innerHTML="<h3 style='text-align:center;margin-top:200px'>Удерживай</h3>";
+// 11 HOLD
+if(n===11){
 let t=0;
+game.innerHTML="<div class='center'><h3>Удерживай</h3></div>";
 
-gameArea.onmousedown=()=>{
-t=Date.now();
-};
-
-gameArea.onmouseup=()=>{
-alert((Date.now()-t)+" ms");
+game.onmousedown=()=>t=Date.now();
+game.onmouseup=()=>{
+game.innerHTML="<div class='center'><h2>"+(Date.now()-t)+" ms</h2></div>";
+setTimeout(next,1500);
 };
 }
 
-/* 12 AIM */
-function aim(){
-let t=document.createElement("div");
-t.className="obj";
-t.onclick=()=>{t.remove();aim();};
-gameArea.appendChild(t);
-
-t.style.left=Math.random()*85+"vw";
-t.style.top=Math.random()*85+"vh";
+// 12 AIM
+if(n===12){
+let o=createObj("white");
+o.onclick=()=>{o.remove();next();};
+game.appendChild(o);
 }
 
-/* 13 AGILITY */
-function agility(){
-let t=document.createElement("div");
-t.className="obj";
-t.style.background="orange";
-
+// 13 AGILITY
+if(n===13){
+let o=createObj("orange");
 setInterval(()=>{
-t.style.left=Math.random()*85+"vw";
-t.style.top=Math.random()*85+"vh";
-},500);
-
-gameArea.appendChild(t);
+o.style.left=Math.random()*80+"vw";
+o.style.top=Math.random()*80+"vh";
+},400);
+setTimeout(next,4000);
 }
 
-/* 14 FAST */
-function fast(){
+// 14 FAST
+if(n===14){
 let start=Date.now();
-gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>ЖМИ СЕЙЧАС</h2>";
+game.innerHTML="<div class='center'><h3>ЖМИ СЕЙЧАС</h3></div>";
 
 setTimeout(()=>{
-gameArea.onclick=()=>{
-let r=Date.now()-start;
-gameArea.innerHTML="<h2>"+r+" ms</h2>";
+game.onclick=()=>{
+game.innerHTML="<div class='center'><h2>"+(Date.now()-start)+" ms</h2></div>";
+setTimeout(next,1500);
 };
 },1000);
 }
 
-/* 15 FINAL */
-function final(){
-gameArea.innerHTML=`
-<div style="text-align:center;margin-top:150px">
+// 15 FINAL
+if(n===15){
+game.innerHTML=`
+<div class="center">
 <h2>Пойдешь гулять?</h2>
 <p>С меня вкусняшки ^-^</p>
-
-<button class='btn' onclick='yes()'>Да</button>
-<button class='btn' id='no'>Нет</button>
-</div>
-`;
+<button onclick="finish()">Да</button>
+<button id="no">Нет</button>
+</div>`;
 
 let no=document.getElementById("no");
-
 no.onmouseover=()=>{
 no.style.position="absolute";
 no.style.left=Math.random()*80+"vw";
@@ -346,8 +251,34 @@ no.style.top=Math.random()*80+"vh";
 };
 }
 
-function yes(){
-gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>Ок 👍</h2>";
+}
+
+/* =====================
+   HELPERS
+===================== */
+
+function createObj(color){
+let d=document.createElement("div");
+d.className="obj";
+d.style.background=color;
+d.style.left=Math.random()*80+"vw";
+d.style.top=Math.random()*80+"vh";
+return d;
+}
+
+function spawnTap(){
+let o=createObj("white");
+
+o.onclick=()=>{
+o.remove();
+spawnTap();
+}
+
+game.appendChild(o);
+}
+
+function finish(){
+game.innerHTML="<div class='center'><h2>Ок 👍</h2></div>";
 }
 
 </script>
