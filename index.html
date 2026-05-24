@@ -34,7 +34,6 @@
 <body>
     <div class="bg-glow"></div>
     <div class="app-container">
-        <!-- СТАРТ -->
         <section class="screen active" id="s-start">
             <div class="blur-card">
                 <h1 class="glow-text">Привет, особенная ✨</h1>
@@ -42,7 +41,6 @@
                 <button class="btn btn-primary" id="start-btn">Начать игру</button>
             </div>
         </section>
-        <!-- УРОВЕНЬ 1 -->
         <section class="screen" id="s-1">
             <div class="blur-card">
                 <div class="instruction">Нажми на зону ниже, когда она позеленеет</div>
@@ -51,7 +49,6 @@
                 <button class="btn btn-primary hidden" id="n-1">Дальше</button>
             </div>
         </section>
-        <!-- УРОВЕНЬ 2 -->
         <section class="screen" id="s-2">
             <div class="blur-card">
                 <div class="instruction">Поймай бегающую искорку</div>
@@ -60,7 +57,6 @@
                 <button class="btn btn-primary hidden" id="n-2">Идем дальше</button>
             </div>
         </section>
-        <!-- УРОВЕНЬ 3 -->
         <section class="screen" id="s-3">
             <div class="blur-card">
                 <div class="instruction">Успей поймать 3 вспышки сердца</div>
@@ -69,7 +65,6 @@
                 <button class="btn btn-primary hidden" id="n-3">Продолжить</button>
             </div>
         </section>
-        <!-- УРОВЕНЬ 4 -->
         <section class="screen" id="s-4">
             <div class="blur-card">
                 <div class="instruction">Нажми, когда круг сузится в самый центр</div>
@@ -78,7 +73,6 @@
                 <button class="btn btn-primary hidden" id="n-4">Двигаться дальше</button>
             </div>
         </section>
-        <!-- УРОВЕНЬ 5 -->
         <section class="screen" id="s-5">
             <div class="blur-card">
                 <div class="instruction">Зажми и удерживай зону, чтобы заполнить шкалу</div>
@@ -90,7 +84,6 @@
                 <button class="btn btn-primary hidden" id="n-5">Почти финал...</button>
             </div>
         </section>
-        <!-- СБОЙ -->
         <section class="screen" id="s-err">
             <div class="blur-card" style="border:1px solid #ff007f; background:rgba(255,0,127,0.03);">
                 <h2 style="color:#ff007f; font-size:1.3rem; margin-bottom:15px; font-family:monospace;">Внимание! Система перегружена!</h2>
@@ -100,7 +93,6 @@
                 </div>
             </div>
         </section>
-        <!-- ФИНАЛ -->
         <section class="screen" id="s-final">
             <div class="blur-card">
                 <h2 class="glow-text">Главный вопрос ✨</h2>
@@ -112,7 +104,6 @@
             </div>
         </section>
     </div>
-
     <script>
         const scr = ['start', '1', '2', '3', '4', '5', 'err', 'final'];
         let idx = 0, actx = null;
