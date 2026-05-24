@@ -3,81 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Arcade</title>
+<title>Mini Game Hub</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#1f1f2e,#2b2b3d,#1a1a25);
+background:#12131a;
 color:white;
 overflow:hidden;
 }
 
 h1{
 text-align:center;
-font-size:20px;
-margin:15px 0;
+font-size:18px;
+margin:10px;
 opacity:0.9;
 }
 
 #menu{
 display:grid;
 grid-template-columns:repeat(3,1fr);
-gap:10px;
+gap:8px;
 padding:10px;
 }
 
-.game{
-background:rgba(255,255,255,0.08);
-border-radius:12px;
-padding:15px;
+.btn{
+background:#1f2230;
+padding:12px;
+border-radius:10px;
 text-align:center;
 font-size:12px;
-cursor:pointer;
-transition:0.2s;
 user-select:none;
+transition:0.2s;
 }
 
-.game:active{
-transform:scale(0.95);
-}
+.btn:active{transform:scale(0.95);}
 
-.screen{
-display:none;
-height:100vh;
-}
-
-.active{
-display:block;
-}
+.screen{display:none;height:100vh;}
+.active{display:block;}
 
 .back{
 position:fixed;
 top:10px;
 left:10px;
-padding:10px;
-background:#444;
+background:#333;
 border:none;
 color:white;
-border-radius:10px;
+padding:8px;
+border-radius:8px;
 }
 
-#noBtn{
+#gameArea{
+position:relative;
+height:100vh;
+}
+
+.obj{
 position:absolute;
-padding:10px 15px;
-background:#666;
+width:30px;
+height:30px;
+border-radius:50%;
+background:red;
+}
+
+.no{
+position:absolute;
+padding:10px;
+background:#555;
 border:none;
 color:white;
 border-radius:10px;
-}
-
-canvas{
-display:block;
-margin:auto;
-background:rgba(255,255,255,0.05);
-border-radius:10px;
-touch-action:manipulation;
 }
 </style>
 </head>
@@ -85,179 +81,149 @@ touch-action:manipulation;
 <body>
 
 <div class="screen active" id="home">
-<h1>Mini Arcade 🎮</h1>
+<h1>Mini Game Hub 🎮</h1>
 
 <div id="menu">
 
-<div class="game" onclick="openGame(1)">🎯 Тап точки</div>
-<div class="game" onclick="openGame(2)">💖 Сердца</div>
-<div class="game" onclick="openGame(3)">🧠 Реакция</div>
-<div class="game" onclick="openGame(4)">🟡 Уклонение</div>
-<div class="game" onclick="openGame(5)">⚡ Скорость</div>
-<div class="game" onclick="openGame(6)">🎲 Рандом</div>
-<div class="game" onclick="openGame(7)">👆 Тап счетчик</div>
-<div class="game" onclick="openGame(8)">📦 Коробки</div>
-<div class="game" onclick="openGame(9)">🔵 Следи</div>
-<div class="game" onclick="openGame(10)">🧩 Пазл</div>
-<div class="game" onclick="openGame(11)">🎮 Удержи</div>
-<div class="game" onclick="openGame(12)">🟢 Попади</div>
-<div class="game" onclick="openGame(13)">💡 Логика</div>
-<div class="game" onclick="openGame(14)">🔴 Увернись</div>
-<div class="game" onclick="openGame(15)">🏁 Финиш</div>
+<div class="btn" onclick="start(1)">🎯 Тап</div>
+<div class="btn" onclick="start(2)">💖 Сердца</div>
+<div class="btn" onclick="start(3)">⚡ Реакция</div>
+<div class="btn" onclick="start(4)">🟡 Додж</div>
+<div class="btn" onclick="start(5)">👆 Счет</div>
+<div class="btn" onclick="start(6)">🎲 Рандом</div>
+<div class="btn" onclick="start(7)">🧠 Память</div>
+<div class="btn" onclick="start(8)">📦 Поймай</div>
+<div class="btn" onclick="start(9)">🔵 Следи</div>
+<div class="btn" onclick="start(10)">🧩 Логика</div>
+<div class="btn" onclick="start(11)">🎮 Удержи</div>
+<div class="btn" onclick="start(12)">🟢 Попади</div>
+<div class="btn" onclick="start(13)">🔴 Увернись</div>
+<div class="btn" onclick="start(14)">💡 Быстро</div>
+<div class="btn" onclick="start(15)">🏁 Финал</div>
 
 </div>
 </div>
 
-<div class="screen" id="gameScreen">
-
+<div class="screen" id="game">
 <button class="back" onclick="back()">←</button>
+<div id="gameArea"></div>
 
-<canvas id="c" width="300" height="400"></canvas>
-
-<button id="noBtn">Нет</button>
-
+<button class="no" id="noBtn">Нет</button>
 </div>
 
 <script>
 
-let canvas = document.getElementById("c");
-let ctx = canvas.getContext("2d");
-
-let current = 0;
-
-function openGame(n){
-current = n;
-document.getElementById("home").classList.remove("active");
-document.getElementById("gameScreen").classList.add("active");
-startGame(n);
-}
-
-function back(){
-document.getElementById("home").classList.add("active");
-document.getElementById("gameScreen").classList.remove("active");
-ctx.clearRect(0,0,300,400);
-}
-
-let score = 0;
-
-// 1 простой тап
-function startGame(n){
-
-score = 0;
-ctx.clearRect(0,0,300,400);
-
-if(n===1){
-drawDot();
-canvas.onclick = () => {
-score++;
-drawDot();
-}
-}
-
-if(n===2){
-heartGame();
-}
-
-if(n===3){
-reactionGame();
-}
-
-if(n===4){
-dodgeGame();
-}
-
-if(n===15){
-finish();
-}
-}
-
-function drawDot(){
-ctx.clearRect(0,0,300,400);
-ctx.fillStyle="white";
-ctx.beginPath();
-let x = Math.random()*280;
-let y = Math.random()*380;
-ctx.arc(x,y,20,0,Math.PI*2);
-ctx.fill();
-}
-
-// сердца (нормальные кликабельные)
-function heartGame(){
-let hearts = [];
-
-for(let i=0;i<10;i++){
-hearts.push({
-x:Math.random()*280,
-y:Math.random()*380
-});
-}
-
-function draw(){
-ctx.clearRect(0,0,300,400);
-
-hearts.forEach(h=>{
-ctx.fillStyle="red";
-ctx.beginPath();
-ctx.arc(h.x,h.y,15,0,Math.PI*2);
-ctx.fill();
-});
-}
-
-canvas.onclick = (e)=>{
-let rect = canvas.getBoundingClientRect();
-let x = e.clientX-rect.left;
-let y = e.clientY-rect.top;
-
-hearts = hearts.filter(h=>{
-let dx = x-h.x;
-let dy = y-h.y;
-return Math.sqrt(dx*dx+dy*dy)>20;
-});
-
-draw();
-};
-
-draw();
-}
-
-// реакция
-function reactionGame(){
-let start = Date.now();
-ctx.fillStyle="white";
-ctx.fillText("ЖМИ!",120,200);
-
-canvas.onclick = ()=>{
-let time = Date.now()-start;
-ctx.clearRect(0,0,300,400);
-ctx.fillText(time+" ms",120,200);
-};
-}
-
-// уклонение
-function dodgeGame(){
-let x = 150;
-document.onmousemove = (e)=>{
-x = e.clientX;
-ctx.clearRect(0,0,300,400);
-ctx.fillRect(x%300,200,20,20);
-};
-}
-
-// финал
-function finish(){
-ctx.fillStyle="white";
-ctx.font="16px Arial";
-ctx.fillText("Пойдешь гулять?",60,180);
-ctx.fillText("С меня вкусняшки ^-^",40,210);
-}
-
-// кнопка "Нет" убегает
+let gameArea = document.getElementById("gameArea");
 let noBtn = document.getElementById("noBtn");
 
-noBtn.addEventListener("mouseover",()=>{
-noBtn.style.top=Math.random()*80+"vh";
+function start(n){
+document.getElementById("home").classList.remove("active");
+document.getElementById("game").classList.add("active");
+
+gameArea.innerHTML = "";
+noBtn.style.display="none";
+
+if(n===1) tapGame();
+if(n===2) heartGame();
+if(n===3) reaction();
+if(n===4) dodge();
+if(n===5) counter();
+if(n===15) final();
+}
+
+// BACK
+function back(){
+document.getElementById("home").classList.add("active");
+document.getElementById("game").classList.remove("active");
+gameArea.innerHTML="";
+}
+
+// 1 TAP
+function tapGame(){
+let obj=document.createElement("div");
+obj.className="obj";
+obj.style.background="white";
+
+obj.onclick=()=>{
+obj.style.left=Math.random()*80+"vw";
+obj.style.top=Math.random()*80+"vh";
+};
+
+gameArea.appendChild(obj);
+move(obj);
+}
+
+function move(o){
+setInterval(()=>{
+o.style.left=Math.random()*80+"vw";
+o.style.top=Math.random()*80+"vh";
+},800);
+}
+
+// 2 HEARTS
+function heartGame(){
+for(let i=0;i<8;i++){
+let h=document.createElement("div");
+h.className="obj";
+h.style.background="red";
+h.onclick=()=>h.remove();
+h.style.left=Math.random()*90+"vw";
+h.style.top=Math.random()*80+"vh";
+gameArea.appendChild(h);
+}
+}
+
+// 3 REACTION
+function reaction(){
+let t=Date.now();
+gameArea.innerHTML="<h3>ЖМИ!</h3>";
+gameArea.onclick=()=>{
+let ms=Date.now()-t;
+gameArea.innerHTML="Время: "+ms+" ms";
+}
+}
+
+// 4 DODGE
+function dodge(){
+noBtn.style.display="block";
+noBtn.onmouseover=()=>{
 noBtn.style.left=Math.random()*80+"vw";
-});
+noBtn.style.top=Math.random()*80+"vh";
+}
+}
+
+// 5 COUNTER
+function counter(){
+let c=0;
+gameArea.innerHTML="<h3>0</h3>";
+gameArea.onclick=()=>{
+c++;
+gameArea.innerHTML="<h3>"+c+"</h3>";
+}
+}
+
+// 15 FINAL
+function final(){
+gameArea.innerHTML=`
+<h2>Пойдешь гулять?</h2>
+<p>С меня вкусняшки ^-^</p>
+
+<button onclick="yes()" style="padding:10px;margin:5px;">Да</button>
+<button id="fakeNo" style="padding:10px;margin:5px;">Нет</button>
+`;
+
+let fakeNo=document.getElementById("fakeNo");
+
+fakeNo.onmouseover=()=>{
+fakeNo.style.position="absolute";
+fakeNo.style.left=Math.random()*80+"vw";
+fakeNo.style.top=Math.random()*80+"vh";
+}
+}
+
+function yes(){
+gameArea.innerHTML="<h2>Ок 👍</h2>";
+}
 
 </script>
 
