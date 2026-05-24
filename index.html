@@ -1,287 +1,1253 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Game Run</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:#0e0f14;
-color:white;
-overflow:hidden;
-}
-
-.center{
-height:100vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-}
-
-button{
-padding:12px 18px;
-margin-top:10px;
-border:none;
-border-radius:10px;
-background:#2a2f44;
-color:white;
-font-size:14px;
-}
-
-.obj{
-position:absolute;
-width:30px;
-height:30px;
-border-radius:50%;
-background:#ff4d6d;
-}
-
-#no{
-position:absolute;
-background:#555;
-}
-
-h2,h3{margin:10px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mini Game Story</title>
+    <!-- Подключаем стили (будут в Части 2) -->
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div id="menu" class="center">
-<h2>Mini Game Run 🎮</h2>
-<p>15 игр подряд без меню</p>
-<button onclick="startGame()">START</button>
-</div>
+    <!-- Эффект живого фона (Дыхание и неон) -->
+    <div class="bg-glow"></div>
+    <div class="ambient-particles" id="particles"></div>
 
-<div id="game" style="display:none; height:100vh; position:relative;"></div>
+    <!-- Главный контейнер игры -->
+    <div id="app" class="app-container">
+        
+        <!-- ЭКРАН 0: Старт -->
+        <section class="screen active" id="screen-start">
+            <div class="blur-card">
+                <h1 class="glow-text">Mini Game Story</h1>
+                <p class="subtitle">15 эмоций. Одно путешествие.</p>
+                <button class="btn btn-primary" id="start-btn">Старт</button>
+            </div>
+        </section>
 
-<script>
+        <!-- ЭКРАН 1: Реакция (Жди зеленый) -->
+        <section class="screen" id="screen-1">
+            <div class="game-zone wait-zone" id="lvl1-zone">
+                <div class="instruction">Нажми, когда экран станет зеленым</div>
+                <div class="status-text" id="lvl1-status">Жди...</div>
+            </div>
+        </section>
 
-let game = document.getElementById("game");
-let menu = document.getElementById("menu");
+        <!-- ЭКРАН 2: Цель (Движущаяся точка) -->
+        <section class="screen" id="screen-2">
+            <div class="instruction">Поймай движущуюся цель</div>
+            <div class="game-zone canvas-zone">
+                <div id="lvl2-target" class="target-dot"></div>
+            </div>
+        </section>
 
-let i = 1;
+        <!-- ЭКРАН 3: Ловля (Быстрое исчезновение) -->
+        <section class="screen" id="screen-3">
+            <div class="instruction">Поймай 3 вспышки</div>
+            <div class="game-zone position-relative" id="lvl3-zone"></div>
+        </section>
 
-function startGame(){
-menu.style.display="none";
-game.style.display="block";
-i=1;
-next();
-}
+        <!-- ЭКРАН 4: Память (Цвета) -->
+        <section class="screen" id="screen-4">
+            <div class="instruction" id="lvl4-instr">Запомни порядок цветов</div>
+            <div class="game-zone dynamic-zone">
+                <div class="memory-sequence" id="lvl4-seq"></div>
+                <div class="memory-grid hidden" id="lvl4-grid"></div>
+            </div>
+        </section>
 
-function next(){
-game.innerHTML="";
-if(i>15){
-game.innerHTML="<div class='center'><h2>Финиш 🏁</h2><p>Готово</p></div>";
-return;
-}
+        <!-- ЭКРАН 5: Следи (Где шарик?) -->
+        <section class="screen" id="screen-5">
+            <div class="instruction" id="lvl5-instr">Следи за подсвеченным наперстком</div>
+            <div class="game-zone cups-zone" id="lvl5-zone">
+                <div class="cup" data-index="0"></div>
+                <div class="cup" data-index="1"></div>
+                <div class="cup" data-index="2"></div>
+            </div>
+        </section>
 
-run(i);
-i++;
-}
+        <!-- ЭКРАН 6: Тайминг (Ритм-зона) -->
+        <section class="screen" id="screen-6">
+            <div class="instruction">Нажми точно в центре круга</div>
+            <div class="game-zone timing-zone" id="lvl6-zone">
+                <div class="timing-ring" id="lvl6-ring"></div>
+                <div class="timing-center"></div>
+            </div>
+        </section>
 
-/* =====================
-   15 РАЗНЫХ ИГР
-===================== */
+        <!-- ЭКРАН 7: Шанс (1 из 3) -->
+        <section class="screen" id="screen-7">
+            <div class="instruction">Доверься интуиции. Выбери одну.</div>
+            <div class="game-zone choice-zone">
+                <div class="chance-card" data-card="1">?</div>
+                <div class="chance-card" data-card="2">?</div>
+                <div class="chance-card" data-card="3">?</div>
+            </div>
+        </section>
 
-function run(n){
+        <!-- ЭКРАН 8: Логика -->
+        <section class="screen" id="screen-8">
+            <div class="instruction">Что продолжает последовательность: 2, 4, 8, 16...</div>
+            <div class="game-zone quiz-zone">
+                <button class="btn btn-choice" data-ans="wrong">24</button>
+                <button class="btn btn-choice" data-ans="correct">32</button>
+                <button class="btn btn-choice" data-ans="wrong">64</button>
+            </div>
+        </section>
 
-// 1 TAP
-if(n===1){
-spawnTap();
-}
+        <!-- ЭКРАН 9: Хаос (Поймай сумасшедший куб) -->
+        <section class="screen" id="screen-9">
+            <div class="instruction">Поймай хаотичный объект</div>
+            <div class="game-zone canvas-zone" id="lvl9-zone">
+                <div id="lvl9-cube" class="chaos-cube"></div>
+            </div>
+        </section>
 
-// 2 HEARTS
-if(n===2){
-for(let k=0;k<8;k++){
-let o=createObj("red");
-o.onclick=()=>o.remove();
-game.appendChild(o);
-}
-setTimeout(next,3000);
-}
+        <!-- ЭКРАН 10: Удержание (Progress bar) -->
+        <section class="screen" id="screen-10">
+            <div class="instruction">Зажми и удерживай экран</div>
+            <div class="game-zone hold-zone" id="lvl10-zone">
+                <div class="progress-container">
+                    <div class="progress-bar" id="lvl10-bar"></div>
+                </div>
+                <div class="hold-text">ЖМИ</div>
+            </div>
+        </section>
 
-// 3 REACTION
-if(n===3){
-let t=Date.now();
-game.innerHTML="<div class='center'><h3>ЖМИ</h3></div>";
-game.onclick=()=>{
-game.innerHTML="<div class='center'><h2>"+(Date.now()-t)+" ms</h2></div>";
-setTimeout(next,1500);
-};
-}
+        <!-- ЭКРАН 11: Фокус (Найди оригинал) -->
+        <section class="screen" id="screen-11">
+            <div class="instruction">Найди единственный РОЗОВЫЙ круг среди фиолетовых</div>
+            <div class="game-zone focus-zone" id="lvl11-zone"></div>
+        </section>
 
-// 4 DODGE
-if(n===4){
-let o=createObj("yellow");
-setInterval(()=>{
-o.style.left=Math.random()*80+"vw";
-o.style.top=Math.random()*80+"vh";
-},600);
-setTimeout(next,4000);
-}
+        <!-- ЭКРАН 12: Фейк-кнопка -->
+        <section class="screen" id="screen-12">
+            <div class="instruction">Нажми на кнопку, пока она стоит</div>
+            <div class="game-zone style-relative">
+                <button class="btn btn-primary dynamic-pos" id="lvl12-btn">Нажми меня</button>
+            </div>
+        </section>
 
-// 5 COUNTER
-if(n===5){
-let c=0;
-game.innerHTML="<div class='center'><h2>0</h2></div>";
-game.onclick=()=>{
-c++;
-game.innerHTML="<div class='center'><h2>"+c+"</h2></div>";
-};
-setTimeout(next,4000);
-}
+        <!-- ЭКРАН 13: Скорость (Кликер) -->
+        <section class="screen" id="screen-13">
+            <div class="instruction">Быстро! 10 тапов!</div>
+            <div class="game-zone clicker-zone">
+                <div class="counter-display" id="lvl13-clicks">0/10</div>
+                <button class="btn btn-round" id="lvl13-btn">TAP</button>
+            </div>
+        </section>
 
-// 6 LUCK
-if(n===6){
-game.innerHTML="<div class='center'><h3>Нажми</h3></div>";
-game.onclick=()=>{
-game.innerHTML="<div class='center'><h2>"+(Math.random()>0.5?"WIN":"LOSE")+"</h2></div>";
-setTimeout(next,1500);
-};
-}
+        <!-- ЭКРАН 14: Выбор (Правильный путь) -->
+        <section class="screen" id="screen-14">
+            <div class="instruction">Выбери истинную цель</div>
+            <div class="game-zone choice-zone-abc">
+                <button class="btn btn-choice-abc" data-v="A">Иллюзия</button>
+                <button class="btn btn-choice-abc" data-v="B">Реальность</button>
+                <button class="btn btn-choice-abc" data-v="C">Опыт</button>
+            </div>
+        </section>
 
-// 7 MEMORY
-if(n===7){
-let colors=["red","blue","green","yellow"];
-let c=colors[Math.floor(Math.random()*4)];
-game.style.background=c;
-setTimeout(()=>{
-game.style.background="#0e0f14";
-game.innerHTML="<div class='center'><h3>Запомни был цвет</h3></div>";
-setTimeout(next,2000);
-},1000);
-}
+        <!-- ЭКРАН 15: Секретная ошибка (Иллюзия бага) -->
+        <section class="screen" id="screen-fake-error">
+            <div class="error-card">
+                <div class="error-title">System Error 0x000F2</div>
+                <div class="error-body">Перезагрузка интерфейса... или нет?</div>
+                <div class="loader-line"></div>
+            </div>
+        </section>
 
-// 8 CATCH
-if(n===8){
-for(let k=0;k<5;k++){
-let o=createObj("cyan");
-o.onclick=()=>o.remove();
-game.appendChild(o);
-}
-setTimeout(next,3000);
-}
+        <!-- ФИНАЛ -->
+        <section class="screen" id="screen-final">
+            <div class="blur-card final-card">
+                <h2 class="glow-text">Путешествие завершено</h2>
+                <p class="final-desc">Ты прошел сквозь хаос и тайминг. Остался один вопрос: Тебе понравилось?</p>
+                <div class="final-actions">
+                    <button class="btn btn-primary" id="final-yes">Да</button>
+                    <button class="btn btn-sec" id="final-no">Нет</button>
+                </div>
+            </div>
+        </section>
 
-// 9 FOLLOW
-if(n===9){
-let o=createObj("lime");
-document.onmousemove=(e)=>{
-o.style.left=e.clientX+"px";
-o.style.top=e.clientY+"px";
-};
-setTimeout(()=>{
-document.onmousemove=null;
-next();
-},4000);
-}
+    </div>
 
-// 10 CHOICE
-if(n===10){
-game.innerHTML=`
-<div class="center">
-<button onclick="next()">A</button>
-<button onclick="next()">B</button>
-<button onclick="next()">C</button>
-</div>`;
-}
-
-// 11 HOLD
-if(n===11){
-let t=0;
-game.innerHTML="<div class='center'><h3>Удерживай</h3></div>";
-
-game.onmousedown=()=>t=Date.now();
-game.onmouseup=()=>{
-game.innerHTML="<div class='center'><h2>"+(Date.now()-t)+" ms</h2></div>";
-setTimeout(next,1500);
-};
-}
-
-// 12 AIM
-if(n===12){
-let o=createObj("white");
-o.onclick=()=>{o.remove();next();};
-game.appendChild(o);
-}
-
-// 13 AGILITY
-if(n===13){
-let o=createObj("orange");
-setInterval(()=>{
-o.style.left=Math.random()*80+"vw";
-o.style.top=Math.random()*80+"vh";
-},400);
-setTimeout(next,4000);
-}
-
-// 14 FAST
-if(n===14){
-let start=Date.now();
-game.innerHTML="<div class='center'><h3>ЖМИ СЕЙЧАС</h3></div>";
-
-setTimeout(()=>{
-game.onclick=()=>{
-game.innerHTML="<div class='center'><h2>"+(Date.now()-start)+" ms</h2></div>";
-setTimeout(next,1500);
-};
-},1000);
-}
-
-// 15 FINAL
-if(n===15){
-game.innerHTML=`
-<div class="center">
-<h2>Пойдешь гулять?</h2>
-<p>С меня вкусняшки ^-^</p>
-<button onclick="finish()">Да</button>
-<button id="no">Нет</button>
-</div>`;
-
-let no=document.getElementById("no");
-no.onmouseover=()=>{
-no.style.position="absolute";
-no.style.left=Math.random()*80+"vw";
-no.style.top=Math.random()*80+"vh";
-};
-}
-
-}
-
-/* =====================
-   HELPERS
-===================== */
-
-function createObj(color){
-let d=document.createElement("div");
-d.className="obj";
-d.style.background=color;
-d.style.left=Math.random()*80+"vw";
-d.style.top=Math.random()*80+"vh";
-return d;
-}
-
-function spawnTap(){
-let o=createObj("white");
-
-o.onclick=()=>{
-o.remove();
-spawnTap();
-}
-
-game.appendChild(o);
-}
-
-function finish(){
-game.innerHTML="<div class='center'><h2>Ок 👍</h2></div>";
-}
-
-</script>
-
+    <!-- Подключаем логику (будет в следующих частях) -->
+    <script src="script.js"></script>
 </body>
 </html>
+/* ==========================================================================
+   1. СБРОС СТИЛЕЙ И ПЕРЕМЕННЫЕ
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+:root {
+    --bg-dark: #0e0f14;
+    --bg-card: rgba(18, 20, 28, 0.7);
+    --neon-blue: #00d2ff;
+    --neon-pink: #ff007f;
+    --neon-purple: #9d4edd;
+    --neon-green: #39ff14;
+    --text-main: #f0f2f5;
+    --text-muted: #7e8494;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-main);
+}
+
+/* ==========================================================================
+   2. АНИМИРОВАННЫЙ ФОН
+   ========================================================================== */
+.bg-glow {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 20%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(255, 0, 127, 0.08) 0%, transparent 40%);
+    z-index: 1;
+    animation: ambientBreathe 12s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes ambientBreathe {
+    0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+    100% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+}
+
+/* ==========================================================================
+   3. КОНТЕЙНЕРЫ И ЭКРАНЫ
+   ========================================================================== */
+.app-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.96) translateY(10px);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.screen.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1) translateY(0);
+}
+
+.instruction {
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text-main);
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    animation: textPulse 3s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+}
+
+.game-zone {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+}
+
+/* ==========================================================================
+   4. БЛОКИ И ПРЕМИУМ КНОПКИ
+   ========================================================================== */
+.blur-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 28px;
+    padding: 40px 30px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.glow-text {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, var(--neon-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 40px;
+}
+
+.btn {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 18px 36px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 280px;
+    outline: none;
+}
+
+.btn:active { transform: scale(0.95); }
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(0, 210, 255, 0.25);
+}
+
+.btn-sec {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-choice, .btn-choice-abc {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 8px 0;
+    width: 100%;
+}
+.btn-choice-abc { padding: 20px; border-radius: 16px; font-size: 1.1rem; }
+
+.btn-round {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(255, 0, 127, 0.3);
+}
+/* ==========================================================================
+   5. МЕХАНИКИ УРОВНЕЙ (СТИЛИ ЗОН)
+   ========================================================================== */
+
+/* Уровень 1: Реакция */
+.wait-zone {
+    width: 100%;
+    height: 80%;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    transition: background-color 0.1s ease;
+    cursor: pointer;
+}
+.wait-zone.ready {
+    background-color: rgba(57, 255, 20, 0.2) !important;
+    border-color: var(--neon-green);
+}
+.status-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+.wait-zone.ready .status-text {
+    color: var(--neon-green);
+    text-shadow: 0 0 15px var(--neon-green);
+}
+
+/* Канвас-зоны для уровней 2, 3 и 9 */
+.canvas-zone, .position-relative {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Уровень 2 и 3: Точки и вспышки */
+.target-dot {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--neon-blue);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+}
+.flash-dot {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: var(--neon-pink);
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--neon-pink);
+    transform: translate(-50%, -50%);
+    animation: flashSpawn 0.6s ease forwards;
+    cursor: pointer;
+}
+@keyframes flashSpawn {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    30% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+/* Уровень 4: Память */
+.memory-sequence {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    transition: background 0.2s ease;
+}
+.memory-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 240px;
+}
+.memory-btn { height: 80px; border-radius: 16px; border: none; cursor: pointer; }
+.c-blue { background: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); }
+.c-pink { background: var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 127, 0.3); }
+.c-purple { background: var(--neon-purple); box-shadow: 0 0 15px rgba(157, 78, 221, 0.3); }
+.c-green { background: var(--neon-green); box-shadow: 0 0 15px rgba(57, 255, 20, 0.3); }
+
+/* Уровень 5: Наперстки */
+.cups-zone { display: flex; justify-content: space-around; align-items: center; width: 100%; height: 200px; }
+.cup {
+    width: 70px;
+    height: 90px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--neon-purple);
+    border-radius: 16px 16px 6px 6px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cup.highlight { border-color: var(--neon-blue); box-shadow: 0 0 25px rgba(0, 210, 255, 0.4); }
+.cup.lifted { transform: translateY(-50px); }
+.cup.has-ball::after {
+    content: ''; position: absolute; bottom: -15px; left: calc(50% - 12px);
+    width: 24px; height: 24px; background: var(--neon-pink); border-radius: 50%;
+    box-shadow: 0 0 15px var(--neon-pink); z-index: -1;
+}
+
+/* Уровень 6: Ритм и тайминг */
+.timing-zone { position: relative; width: 200px; height: 200px; }
+.timing-center {
+    position: absolute; top: 50%; left: 50%; width: 40px; height: 40px;
+    background: rgba(255, 255, 255, 0.1); border: 2px solid var(--text-main);
+    border-radius: 50%; transform: translate(-50%, -50%);
+}
+.timing-ring {
+    position: absolute; top: 50%; left: 50%; width: 180px; height: 180px;
+    border: 3px solid var(--neon-blue); border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1); pointer-events: none;
+}
+
+/* Уровень 7: Интуиция */
+.choice-zone { display: flex; justify-content: space-between; width: 100%; gap: 12px; }
+.chance-card {
+    flex: 1; height: 140px; background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.8rem; font-weight: bold; color: var(--text-muted); cursor: pointer;
+    transition: transform 0.2s, border-color 0.3s;
+}
+.chance-card.success { border-color: var(--neon-green); background: rgba(57, 255, 20, 0.05); color: var(--neon-green); }
+
+/* Уровень 9: Хаос */
+.chaos-cube {
+    position: absolute; width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-blue));
+    border-radius: 10px; box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+    cursor: pointer; transform: translate(-50%, -50%);
+}
+
+/* Уровень 10: Удержание */
+.hold-zone {
+    width: 100%; height: 240px; border-radius: 24px;
+    background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative; overflow: hidden; cursor: pointer;
+}
+.progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+.progress-bar { width: 0%; height: 100%; background: linear-gradient(0deg, rgba(157, 78, 221, 0.2), rgba(0, 210, 255, 0.4)); }
+.hold-text { position: absolute; z-index: 2; font-size: 2rem; font-weight: 900; opacity: 0.3; }
+
+/* Уровень 11: Фокус */
+.focus-zone { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; }
+.focus-dot { aspect-ratio: 1; border-radius: 50%; background: var(--neon-purple); cursor: pointer; opacity: 0.7; }
+.focus-dot.target { background: var(--neon-pink) !important; box-shadow: 0 0 15px var(--neon-pink); }
+
+/* Уровень 12: Движущаяся кнопка */
+.style-relative { position: relative; width: 100%; height: 300px; }
+.dynamic-pos { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 200px; transition: all 0.15s ease; }
+
+/* Уровень 13: Скорость */
+.counter-display { font-size: 3rem; font-weight: 800; margin-bottom: 24px; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+
+/* Уровень 15: Имитация ошибки */
+#screen-fake-error { background: #050508; }
+.error-card {
+    font-family: monospace; width: 100%; max-width: 360px; padding: 30px;
+    border: 1px solid #ff3333; background: rgba(255, 51, 51, 0.03); border-radius: 8px;
+}
+.error-title { color: #ff3333; font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; }
+.error-body { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+.loader-line { width: 100%; height: 2px; background: #222; position: relative; overflow: hidden; }
+.loader-line::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 40%; background: #ff3333; animation: errLoader 1.5s infinite linear; }
+@keyframes errLoader { 0% { left: -40%; } 100% { left: 100%; } }
+
+/* Дополнительные служебные стили */
+.hidden { display: none !important; }
+.quiz-zone { width: 100%; max-width: 280px; }
+.final-actions { position: relative; width: 100%; height: 60px; margin-top: 20px; }
+.final-actions .btn { position: absolute; max-width: 130px; margin: 0; }
+#final-yes { left: calc(50% - 140px); }
+#final-no { right: calc(50% - 140px); transition: all 0.15s ease; }
+// ==========================================================================
+// 1. КОНФИГУРАЦИЯ И ПЕРЕМЕННЫЕ СОСТОЯНИЯ
+// ==========================================================================
+const GameState = {
+    currentLevel: 0,
+    score: 0,
+    audioCtx: null,
+    secretClicks: 0,
+    isTransitioning: false
+};
+
+// Порядок экранов в нашей игре-истории
+const LevelOrder = [
+    'start', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'fake-error', 'final'
+];
+
+// ==========================================================================
+// 2. ЗВУКОВОЙ ДВИЖОК (ГЕНЕРАЦИЯ ЗВУКОВ НА ЛЕТУ ЧЕРЕЗ WEB AUDIO API)
+// ==========================================================================
+function initAudio() {
+    if (!GameState.audioCtx) {
+        GameState.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        playLofiBackground();
+    }
+}
+
+function playSound(type) {
+    if (!GameState.audioCtx) return;
+    const ctx = GameState.audioCtx;
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+
+    if (type === 'click') {
+        // Мягкий клик при нажатии кнопки
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(120, now);
+        gainNode.gain.setValueAtTime(0.15, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+    } else if (type === 'pop') {
+        // Сочный поп при попадании по цели
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.08);
+        gainNode.gain.setValueAtTime(0.2, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+    } else if (type === 'whoosh') {
+        // Мягкий переход между уровнями
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+        gainNode.gain.setValueAtTime(0.1, now);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    }
+}
+
+// Очень тихий lo-fi шум фоном
+function playLofiBackground() {
+    const ctx = GameState.audioCtx;
+    const bufferSize = ctx.sampleRate * 2;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    noise.loop = true;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 400; // Мягкий приглушенный срез
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0.015; // Почти неслышный гул
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start();
+}
+
+// ==========================================================================
+// 3. ТАКТИЛЬНЫЙ ОТКЛИК И ДВИЖОК ЭКРАНОВ
+// ==========================================================================
+function triggerVibrate() {
+    if (navigator.vibrate) {
+        navigator.vibrate(15); // Короткий импульс успеха
+    }
+}
+
+function nextLevel() {
+    if (GameState.isTransitioning) return;
+    GameState.isTransitioning = true;
+
+    playSound('whoosh');
+    
+    const currentId = `screen-${LevelOrder[GameState.currentLevel]}`;
+    GameState.currentLevel++;
+    const nextId = `screen-${LevelOrder[GameState.currentLevel]}`;
+
+    const currentScreen = document.getElementById(currentId);
+    const nextScreen = document.getElementById(nextId);
+
+    if (currentScreen) currentScreen.classList.remove('active');
+    
+    setTimeout(() => {
+        if (nextScreen) {
+            nextScreen.classList.add('active');
+            // Автоматически запускаем инициализацию механики нового уровня
+            initLevelMechanics(LevelOrder[GameState.currentLevel]);
+        }
+        GameState.isTransitioning = false;
+    }, 450); // Идеальный тайминг под CSS анимацию
+}
+
+// Секретный клик (пасхалка на главном экране)
+document.getElementById('screen-start').addEventListener('click', (e) => {
+    if (e.target.id === 'start-btn') return;
+    GameState.secretClicks++;
+    if (GameState.secretClicks === 3) {
+        triggerVibrate();
+        alert('✨ Секрет открыт: Ты нашел альтернативное измерение кода.');
+        GameState.secretClicks = 0;
+    }
+});
+
+// Кнопка Старт
+document.getElementById('start-btn').addEventListener('click', () => {
+    initAudio();
+    playSound('click');
+    nextLevel();
+});
+// ==========================================================================
+// 4. ДВИЖОК МИНИ-ИГР (УРОВНИ 1 - 7)
+// ==========================================================================
+
+function initLevelMechanics(levelId) {
+    switch (levelId) {
+        case '1': initLvl1(); break;
+        case '2': initLvl2(); break;
+        case '3': initLvl3(); break;
+        case '4': initLvl4(); break;
+        case '5': initLvl5(); break;
+        case '6': initLvl6(); break;
+        case '7': initLvl7(); break;
+        default: 
+            // Передаем управление второй половине уровней (будет в Части 5)
+            if (typeof initAdvancedLevels === 'function') {
+                initAdvancedLevels(levelId);
+            }
+            break;
+    }
+}
+
+// --- УРОВЕНЬ 1: Реакция (Жди зеленый) ---
+function initLvl1() {
+    const zone = document.getElementById('lvl1-zone');
+    const status = document.getElementById('lvl1-status');
+    let canClick = false;
+
+    zone.className = 'game-zone wait-zone';
+    status.innerText = 'Жди...';
+
+    const delay = Math.random() * 2000 + 1500; // от 1.5 до 3.5 сек
+
+    const timeoutId = setTimeout(() => {
+        canClick = true;
+        zone.classList.add('ready');
+        status.innerText = 'ЖМИ!';
+    }, delay);
+
+    zone.onclick = () => {
+        if (canClick) {
+            triggerVibrate();
+            playSound('pop');
+            zone.onclick = null;
+            nextLevel();
+        } else {
+            // Защита от раннего клика: сброс и новый старт уровня
+            clearTimeout(timeoutId);
+            status.innerText = 'Слишком рано! Жди...';
+            zone.style.backgroundColor = 'rgba(255,0,0,0.1)';
+            setTimeout(() => {
+                zone.style.backgroundColor = '';
+                initLvl1();
+            }, 1000);
+        }
+    };
+}
+
+// --- УРОВЕНЬ 2: Цель (Движущаяся точка) ---
+function initLvl2() {
+    const target = document.getElementById('lvl2-target');
+    let angle = 0;
+    
+    // Плавное вращение точки по кругу через requestAnimationFrame
+    function move() {
+        if (!document.getElementById('screen-2').classList.contains('active')) return;
+        angle += 0.04;
+        const x = 50 + Math.cos(angle) * 35;
+        const y = 50 + Math.sin(angle) * 35;
+        target.style.left = `${x}%`;
+        target.style.top = `${y}%`;
+        requestAnimationFrame(move);
+    }
+    move();
+
+    target.onclick = (e) => {
+        e.stopPropagation();
+        triggerVibrate();
+        playSound('pop');
+        target.onclick = null;
+        nextLevel();
+    };
+}
+
+// --- УРОВЕНЬ 3: Ловля (Быстрые вспышки) ---
+function initLvl3() {
+    const zone = document.getElementById('lvl3-zone');
+    let caught = 0;
+    zone.innerHTML = '';
+
+    function spawnFlash() {
+        if (!document.getElementById('screen-3').classList.contains('active')) return;
+        if (caught >= 3) return;
+
+        const flash = document.createElement('div');
+        flash.className = 'flash-dot';
+        flash.style.left = `${Math.random() * 80 + 10}%`;
+        flash.style.top = `${Math.random() * 80 + 10}%`;
+
+        flash.onclick = (e) => {
+            e.stopPropagation();
+            triggerVibrate();
+            playSound('pop');
+            caught++;
+            flash.remove();
+            if (caught >= 3) {
+                nextLevel();
+            } else {
+                setTimeout(spawnFlash, 300);
+            }
+        };
+
+        zone.appendChild(flash);
+
+        // Если игрок не успел нажать, точка исчезает и спавнится новая
+        setTimeout(() => {
+            if (flash.parentNode) {
+                flash.remove();
+                setTimeout(spawnFlash, 200);
+            }
+        }, 600);
+    }
+
+    spawnFlash();
+}
+
+// --- УРОВЕНЬ 4: Память (Цвета) ---
+function initLvl4() {
+    const seqDisplay = document.getElementById('lvl4-seq');
+    const grid = document.getElementById('lvl4-grid');
+    const instr = document.getElementById('lvl4-instr');
+    
+    const colors = ['c-blue', 'c-pink', 'c-purple'];
+    const sequence = [colors[Math.floor(Math.random()*3)], colors[Math.floor(Math.random()*3)], colors[Math.floor(Math.random()*3)]];
+    let step = 0;
+    let userStep = 0;
+
+    instr.innerText = 'Запомни порядок цветов';
+    seqDisplay.classList.remove('hidden');
+    grid.classList.add('hidden');
+
+    function showSequence() {
+        if (step < sequence.length) {
+            seqDisplay.className = `memory-sequence ${sequence[step]}`;
+            playSound('click');
+            step++;
+            setTimeout(() => {
+                seqDisplay.className = 'memory-sequence';
+                setTimeout(showSequence, 300);
+            }, 600);
+        } else {
+            // Показываем сетку для ввода
+            seqDisplay.classList.add('hidden');
+            grid.classList.remove('hidden');
+            instr.innerText = 'Повтори последовательность';
+            renderMemoryGrid();
+        }
+    }
+
+    function renderMemoryGrid() {
+        grid.innerHTML = '';
+        colors.forEach(color => {
+            const btn = document.createElement('button');
+            btn.className = `memory-btn ${color}`;
+            btn.onclick = () => {
+                playSound('click');
+                if (color === sequence[userStep]) {
+                    userStep++;
+                    if (userStep === sequence.length) {
+                        triggerVibrate();
+                        playSound('pop');
+                        nextLevel();
+                    }
+                } else {
+                    triggerVibrate();
+                    initLvl4(); // Ошибка — перезапуск уровня
+                }
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    setTimeout(showSequence, 500);
+}
+
+// --- УРОВЕНЬ 5: Следи (Напёрстки) ---
+function initLvl5() {
+    const cups = document.querySelectorAll('#lvl5-zone .cup');
+    const instr = document.getElementById('lvl5-instr');
+    const winningIndex = Math.floor(Math.random() * 3);
+    
+    instr.innerText = 'Следи за подсвеченным напёрстком';
+    
+    cups.forEach((cup, idx) => {
+        cup.className = 'cup';
+        cup.style.transform = '';
+        if (idx === winningIndex) {
+            cup.classList.add('highlight', 'has-ball');
+        }
+    });
+
+    // Шаг 1: Показываем где шарик (поднимаем напёрсток)
+    setTimeout(() => {
+        cups[winningIndex].classList.add('lifted');
+        setTimeout(() => {
+            cups[winningIndex].classList.remove('lifted');
+            // Шаг 2: Убираем подсветку и "перемешиваем" (визуальная иллюзия)
+            setTimeout(() => {
+                cups[winningIndex].classList.remove('highlight');
+                instr.innerText = 'Где он? Выбирай';
+                
+                cups.forEach(cup => {
+                    cup.onclick = function() {
+                        cups.forEach(c => c.onclick = null); // Блокируем тапы
+                        this.classList.add('lifted');
+                        if (this.classList.contains('has-ball')) {
+                            triggerVibrate();
+                            playSound('pop');
+                            setTimeout(nextLevel, 800);
+                        } else {
+                            triggerVibrate();
+                            setTimeout(initLvl5, 1000); // Ошибка — рестарт
+                        }
+                    };
+                });
+            }, 600);
+        }, 1000);
+    }, 500);
+}
+
+// --- УРОВЕНЬ 6: Тайминг (Ритм-зона) ---
+function initLvl6() {
+    const ring = document.getElementById('lvl6-ring');
+    const zone = document.getElementById('lvl6-zone');
+    let scale = 1.8;
+    let direction = -1;
+    let animationId;
+
+    function pulse() {
+        if (!document.getElementById('screen-6').classList.contains('active')) return;
+        
+        scale += 0.025 * direction;
+        if (scale <= 0.3) direction = 1;
+        if (scale >= 1.9) direction = -1;
+
+        ring.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        animationId = requestAnimationFrame(pulse);
+    }
+    pulse();
+
+    zone.onclick = () => {
+        // Идеальный момент, когда scale близок к центру (0.4 - 0.65)
+        if (scale >= 0.35 && scale <= 0.7) {
+            cancelAnimationFrame(animationId);
+            triggerVibrate();
+            playSound('pop');
+            zone.onclick = null;
+            nextLevel();
+        } else {
+            triggerVibrate();
+            // Лёгкая вспышка ошибки без рестарта
+            ring.style.borderColor = 'var(--neon-pink)';
+            setTimeout(() => ring.style.borderColor = 'var(--neon-blue)', 300);
+        }
+    };
+}
+
+// --- УРОВЕНЬ 7: Шанс (Интуиция) ---
+function initLvl7() {
+    const cards = document.querySelectorAll('.chance-card');
+    const luckyCard = Math.floor(Math.random() * 3) + 1;
+
+    cards.forEach(card => {
+        card.className = 'chance-card';
+        card.innerText = '?';
+        
+        card.onclick = function() {
+            cards.forEach(c => c.onclick = null);
+            const chosen = parseInt(this.getAttribute('data-card'));
+            
+            if (chosen === luckyCard) {
+                this.classList.add('success');
+                this.innerText = '✔';
+                triggerVibrate();
+                playSound('pop');
+                setTimeout(nextLevel, 800);
+            } else {
+                // Если не угадал — плавно подсвечиваем правильную и перезапускаем через секунду
+                this.style.borderColor = 'var(--neon-pink)';
+                this.innerText = '✘';
+                document.querySelector(`[data-card="${luckyCard}"]`).classList.add('success');
+                triggerVibrate();
+                setTimeout(initLvl7, 1200);
+            }
+        };
+    });
+}
+// ==========================================================================
+// 5. ПРОДВИНУТЫЕ МИНИ-ИГРЫ (УРОВНИ 8 - 14) И ФИНАЛ
+// ==========================================================================
+
+function initAdvancedLevels(levelId) {
+    switch (levelId) {
+        case '8': initLvl8(); break;
+        case '9': initLvl9(); break;
+        case '10': initLvl10(); break;
+        case '11': initLvl11(); break;
+        case '12': initLvl12(); break;
+        case '13': initLvl13(); break;
+        case '14': initLvl14(); break;
+        case 'fake-error': initFakeError(); break;
+        case 'final': initFinalScreen(); break;
+    }
+}
+
+// --- УРОВЕНЬ 8: Логика (Последовательность) ---
+function initLvl8() {
+    const buttons = document.querySelectorAll('#screen-8 .btn-choice');
+    buttons.forEach(btn => {
+        btn.onclick = function() {
+            const ans = this.getAttribute('data-ans');
+            if (ans === 'correct') {
+                triggerVibrate();
+                playSound('pop');
+                buttons.forEach(b => b.onclick = null);
+                nextLevel();
+            } else {
+                triggerVibrate();
+                this.style.borderColor = 'var(--neon-pink)';
+                setTimeout(() => this.style.borderColor = '', 500);
+            }
+        };
+    });
+}
+
+// --- УРОВЕНЬ 9: Хаос (Сумасшедший куб) ---
+function initLvl9() {
+    const cube = document.getElementById('lvl9-cube');
+    let targetX = 50, targetY = 50;
+    let currentX = 50, currentY = 50;
+
+    // Резкая смена траектории движения куба по интервалу
+    const moveInterval = setInterval(() => {
+        if (!document.getElementById('screen-9').classList.contains('active')) {
+            clearInterval(moveInterval);
+            return;
+        }
+        targetX = Math.random() * 80 + 10;
+        targetY = Math.random() * 80 + 10;
+    }, 400);
+
+    // Плавная интерполяция к целевой точке для исключения телепортаций
+    function updatePhysics() {
+        if (!document.getElementById('screen-9').classList.contains('active')) return;
+        currentX += (targetX - currentX) * 0.12;
+        currentY += (targetY - currentY) * 0.12;
+        cube.style.left = `${currentX}%`;
+        cube.style.top = `${currentY}%`;
+        requestAnimationFrame(updatePhysics);
+    }
+    updatePhysics();
+
+    cube.onclick = (e) => {
+        e.stopPropagation();
+        clearInterval(moveInterval);
+        triggerVibrate();
+        playSound('pop');
+        cube.onclick = null;
+        nextLevel();
+    };
+}
+
+// --- УРОВЕНЬ 10: Удержание (Progress bar) ---
+function initLvl10() {
+    const zone = document.getElementById('lvl10-zone');
+    const bar = document.getElementById('lvl10-bar');
+    let progress = 0;
+    let isHolding = false;
+    let intervalId = null;
+
+    function startHold() {
+        isHolding = true;
+        intervalId = setInterval(() => {
+            if (progress < 100) {
+                progress += 2.5; // Скорость заполнения
+                bar.style.width = `${progress}%`;
+            } else {
+                clearInterval(intervalId);
+                zone.onmousedown = zone.ontouchstart = null;
+                zone.onmouseup = zone.ontouchend = null;
+                triggerVibrate();
+                playSound('pop');
+                nextLevel();
+            }
+        }, 30);
+    }
+
+    function stopHold() {
+        isHolding = false;
+        clearInterval(intervalId);
+        // Если отпустил — прогресс плавно падает назад
+        intervalId = setInterval(() => {
+            if (progress > 0 && !isHolding) {
+                progress -= 4;
+                if (progress < 0) progress = 0;
+                bar.style.width = `${progress}%`;
+            } else {
+                clearInterval(intervalId);
+            }
+        }, 30);
+    }
+
+    // Универсальные события под мышь и тач-скрин смартфонов
+    zone.onmousedown = zone.ontouchstart = (e) => { e.preventDefault(); startHold(); };
+    zone.onmouseup = zone.ontouchend = () => { stopHold(); };
+}
+
+// --- УРОВЕНЬ 11: Фокус (Найди оригинал) ---
+function initLvl11() {
+    const zone = document.getElementById('lvl11-zone');
+    zone.innerHTML = '';
+    const totalDots = 20;
+    const targetIndex = Math.floor(Math.random() * totalDots);
+
+    for (let i = 0; i < totalDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'focus-dot';
+        
+        if (i === targetIndex) {
+            dot.classList.add('target');
+            dot.onclick = () => {
+                triggerVibrate();
+                playSound('pop');
+                nextLevel();
+            };
+        } else {
+            dot.onclick = () => {
+                triggerVibrate();
+                dot.style.opacity = '0.2'; // Гасим неверные клики
+            };
+        }
+        zone.appendChild(dot);
+    }
+}
+
+// --- УРОВЕНЬ 12: Фейк-кнопка (Замирание) ---
+function initLvl12() {
+    const btn = document.getElementById('lvl12-btn');
+    let isMoving = true;
+
+    function jitter() {
+        if (!document.getElementById('screen-12').classList.contains('active')) return;
+        if (isMoving) {
+            btn.style.left = `${Math.random() * 60 + 20}%`;
+            btn.style.top = `${Math.random() * 60 + 20}%`;
+        }
+        // Случайные остановки во времени
+        setTimeout(jitter, Math.random() * 400 + 300);
+    }
+    jitter();
+
+    // Каждые 1.5 секунды кнопка замирает на короткий миг — это шанс игрока
+    const freezeInterval = setInterval(() => {
+        if (!document.getElementById('screen-12').classList.contains('active')) {
+            clearInterval(freezeInterval);
+            return;
+        }
+        isMoving = false;
+        btn.style.boxShadow = '0 0 25px var(--neon-green)';
+        setTimeout(() => {
+            isMoving = true;
+            btn.style.boxShadow = '';
+        }, 350);
+    }, 1500);
+
+    btn.onclick = () => {
+        if (!isMoving) {
+            clearInterval(freezeInterval);
+            triggerVibrate();
+            playSound('pop');
+            btn.onclick = null;
+            nextLevel();
+        } else {
+            triggerVibrate(); // Клик во время движения не засчитывается
+        }
+    };
+}
+
+// --- УРОВЕНЬ 13: Скорость (Тап-кликер) ---
+function initLvl13() {
+    const btn = document.getElementById('lvl13-btn');
+    const display = document.getElementById('lvl13-clicks');
+    let clicks = 0;
+
+    display.innerText = '0/10';
+    btn.onclick = () => {
+        clicks++;
+        playSound('click');
+        display.innerText = `${clicks}/10`;
+        
+        // Легкий визуальный отклик счетчика
+        display.style.transform = 'scale(1.1)';
+        setTimeout(() => display.style.transform = '', 60);
+
+        if (clicks >= 10) {
+            triggerVibrate();
+            playSound('pop');
+            btn.onclick = null;
+            nextLevel();
+        }
+    };
+}
+
+// --- УРОВЕНЬ 14: Выбор (Истинный путь) ---
+function initLvl14() {
+    const buttons = document.querySelectorAll('.btn-choice-abc');
+    buttons.forEach(btn => {
+        btn.onclick = function() {
+            triggerVibrate();
+            playSound('pop');
+            buttons.forEach(b => b.onclick = null);
+            nextLevel(); // Любой осознанный выбор продвигает дальше
+        };
+    });
+}
+
+// --- УРОВЕНЬ 15: Иллюзия сбоя системы ---
+function initFakeError() {
+    // Уровень идет сам — через 2.5 секунды переключается на финал
+    setTimeout(() => {
+        nextLevel();
+    }, 2500);
+}
+
+// --- ФИНАЛ: Интерактивный экран (Убегающая кнопка) ---
+function initFinalScreen() {
+    const btnYes = document.getElementById('final-yes');
+    const btnNo = document.getElementById('final-no');
+
+    btnYes.onclick = () => {
+        triggerVibrate();
+        playSound('pop');
+        alert('🎉 Спасибо за прохождение! Твой мозг успешно завершил цепочку состояний.');
+        // Рестарт игры
+        GameState.currentLevel = 0;
+        document.getElementById('screen-final').classList.remove('active');
+        document.getElementById('screen-start').classList.add('active');
+    };
+
+    // Механика «Убегания» кнопки Нет под палец/курсор
+    const escapeRoute = (e) => {
+        e.preventDefault();
+        // Перемещаем кнопку в случайные координаты внутри финальной панели действий
+        const randomX = Math.random() * 120 - 60; // Смещение влево-вправо
+        const randomY = Math.random() * 100 - 50; // Смещение вверх-вниз
+        
+        btnNo.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        playSound('click');
+    };
+
+    btnNo.onmouseover = btnNo.ontouchstart = escapeRoute;
+}
