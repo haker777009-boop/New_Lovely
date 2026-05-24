@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Game Hub</title>
+<title>Mini Game Hub 💫</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#12131a;
-color:white;
+background:#0f111a;
+color:#eaeaea;
 overflow:hidden;
 }
 
@@ -18,7 +18,7 @@ h1{
 text-align:center;
 font-size:18px;
 margin:10px;
-opacity:0.9;
+opacity:0.8;
 }
 
 #menu{
@@ -28,17 +28,16 @@ gap:8px;
 padding:10px;
 }
 
-.btn{
-background:#1f2230;
+.item{
+background:#1b1f2e;
 padding:12px;
 border-radius:10px;
+font-size:11px;
 text-align:center;
-font-size:12px;
 user-select:none;
 transition:0.2s;
 }
-
-.btn:active{transform:scale(0.95);}
+.item:active{transform:scale(0.95);}
 
 .screen{display:none;height:100vh;}
 .active{display:block;}
@@ -52,11 +51,13 @@ border:none;
 color:white;
 padding:8px;
 border-radius:8px;
+z-index:10;
 }
 
 #gameArea{
-position:relative;
 height:100vh;
+position:relative;
+overflow:hidden;
 }
 
 .obj{
@@ -64,165 +65,289 @@ position:absolute;
 width:30px;
 height:30px;
 border-radius:50%;
-background:red;
+background:#ff4d6d;
 }
 
-.no{
-position:absolute;
+.btn{
 padding:10px;
-background:#555;
+margin:5px;
 border:none;
+border-radius:8px;
+background:#2a2f44;
 color:white;
-border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- HOME -->
 <div class="screen active" id="home">
 <h1>Mini Game Hub 🎮</h1>
 
 <div id="menu">
-
-<div class="btn" onclick="start(1)">🎯 Тап</div>
-<div class="btn" onclick="start(2)">💖 Сердца</div>
-<div class="btn" onclick="start(3)">⚡ Реакция</div>
-<div class="btn" onclick="start(4)">🟡 Додж</div>
-<div class="btn" onclick="start(5)">👆 Счет</div>
-<div class="btn" onclick="start(6)">🎲 Рандом</div>
-<div class="btn" onclick="start(7)">🧠 Память</div>
-<div class="btn" onclick="start(8)">📦 Поймай</div>
-<div class="btn" onclick="start(9)">🔵 Следи</div>
-<div class="btn" onclick="start(10)">🧩 Логика</div>
-<div class="btn" onclick="start(11)">🎮 Удержи</div>
-<div class="btn" onclick="start(12)">🟢 Попади</div>
-<div class="btn" onclick="start(13)">🔴 Увернись</div>
-<div class="btn" onclick="start(14)">💡 Быстро</div>
-<div class="btn" onclick="start(15)">🏁 Финал</div>
-
+<div class="item" onclick="start(1)">🎯 Тап цели</div>
+<div class="item" onclick="start(2)">💖 Клик сердца</div>
+<div class="item" onclick="start(3)">⚡ Реакция</div>
+<div class="item" onclick="start(4)">🟡 Уклонение</div>
+<div class="item" onclick="start(5)">👆 Счетчик</div>
+<div class="item" onclick="start(6)">🎲 Шанс</div>
+<div class="item" onclick="start(7)">🧠 Память</div>
+<div class="item" onclick="start(8)">📦 Поймай</div>
+<div class="item" onclick="start(9)">🔵 След</div>
+<div class="item" onclick="start(10)">🧩 Выбор</div>
+<div class="item" onclick="start(11)">🎮 Удержи</div>
+<div class="item" onclick="start(12)">🟢 Попади</div>
+<div class="item" onclick="start(13)">🔴 Ловкость</div>
+<div class="item" onclick="start(14)">💡 Быстро</div>
+<div class="item" onclick="start(15)">🏁 Финал</div>
 </div>
 </div>
 
+<!-- GAME -->
 <div class="screen" id="game">
 <button class="back" onclick="back()">←</button>
 <div id="gameArea"></div>
-
-<button class="no" id="noBtn">Нет</button>
 </div>
 
 <script>
 
-let gameArea = document.getElementById("gameArea");
-let noBtn = document.getElementById("noBtn");
+let gameArea=document.getElementById("gameArea");
 
 function start(n){
 document.getElementById("home").classList.remove("active");
 document.getElementById("game").classList.add("active");
+gameArea.innerHTML="";
 
-gameArea.innerHTML = "";
-noBtn.style.display="none";
-
-if(n===1) tapGame();
-if(n===2) heartGame();
-if(n===3) reaction();
-if(n===4) dodge();
-if(n===5) counter();
-if(n===15) final();
+if(n===1 tap());
+if(n===2 hearts());
+if(n===3 reaction());
+if(n===4 dodge());
+if(n===5 counter());
+if(n===6 luck());
+if(n===7 memory());
+if(n===8 catchGame());
+if(n===9 follow());
+if(n===10 choose());
+if(n===11 hold());
+if(n===12 aim());
+if(n===13 agility());
+if(n===14 fast());
+if(n===15 final());
 }
 
-// BACK
 function back(){
 document.getElementById("home").classList.add("active");
 document.getElementById("game").classList.remove("active");
 gameArea.innerHTML="";
 }
 
-// 1 TAP
-function tapGame(){
-let obj=document.createElement("div");
-obj.className="obj";
-obj.style.background="white";
+/* 1 TAP */
+function tap(){
+spawnTarget();
+function spawnTarget(){
+let d=document.createElement("div");
+d.className="obj";
+d.style.background="white";
+d.style.left=Math.random()*80+"vw";
+d.style.top=Math.random()*80+"vh";
 
-obj.onclick=()=>{
-obj.style.left=Math.random()*80+"vw";
-obj.style.top=Math.random()*80+"vh";
-};
-
-gameArea.appendChild(obj);
-move(obj);
+d.onclick=()=>{
+d.remove();
+spawnTarget();
 }
 
-function move(o){
-setInterval(()=>{
-o.style.left=Math.random()*80+"vw";
-o.style.top=Math.random()*80+"vh";
-},800);
+gameArea.appendChild(d);
+}
 }
 
-// 2 HEARTS
-function heartGame(){
-for(let i=0;i<8;i++){
+/* 2 HEARTS (КЛИКАБЕЛЬНЫЕ) */
+function hearts(){
+for(let i=0;i<10;i++){
 let h=document.createElement("div");
 h.className="obj";
 h.style.background="red";
+h.style.left=Math.random()*85+"vw";
+h.style.top=Math.random()*85+"vh";
+
 h.onclick=()=>h.remove();
-h.style.left=Math.random()*90+"vw";
-h.style.top=Math.random()*80+"vh";
+
 gameArea.appendChild(h);
 }
 }
 
-// 3 REACTION
+/* 3 REACTION */
 function reaction(){
-let t=Date.now();
-gameArea.innerHTML="<h3>ЖМИ!</h3>";
+let start=Date.now();
+gameArea.innerHTML="<h3 style='text-align:center;margin-top:200px'>ЖМИ!</h3>";
+
 gameArea.onclick=()=>{
-let ms=Date.now()-t;
-gameArea.innerHTML="Время: "+ms+" ms";
-}
+let ms=Date.now()-start;
+gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>"+ms+" ms</h2>";
+};
 }
 
-// 4 DODGE
+/* 4 DODGE */
 function dodge(){
-noBtn.style.display="block";
-noBtn.onmouseover=()=>{
-noBtn.style.left=Math.random()*80+"vw";
-noBtn.style.top=Math.random()*80+"vh";
-}
+let b=document.createElement("div");
+b.className="obj";
+b.style.background="#ffd166";
+
+gameArea.appendChild(b);
+
+setInterval(()=>{
+b.style.left=Math.random()*85+"vw";
+b.style.top=Math.random()*85+"vh";
+},700);
 }
 
-// 5 COUNTER
+/* 5 COUNTER */
 function counter(){
 let c=0;
-gameArea.innerHTML="<h3>0</h3>";
+gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>0</h2>";
+
 gameArea.onclick=()=>{
 c++;
-gameArea.innerHTML="<h3>"+c+"</h3>";
+gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>"+c+"</h2>";
+};
+}
+
+/* 6 LUCK */
+function luck(){
+gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>Нажми</h2>";
+
+gameArea.onclick=()=>{
+let r=Math.random();
+gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>"+(r>0.5?"WIN":"LOSE")+"</h2>";
+};
+}
+
+/* 7 MEMORY */
+function memory(){
+gameArea.innerHTML="<h3 style='text-align:center;margin-top:200px'>Запомни цвет</h3>";
+setTimeout(()=>{
+let c=["red","blue","green","yellow"][Math.floor(Math.random()*4)];
+gameArea.style.background=c;
+
+setTimeout(()=>{
+gameArea.style.background="#0f111a";
+gameArea.onclick=()=>alert("Какой был цвет?");
+},1000);
+},1000);
+}
+
+/* 8 CATCH */
+function catchGame(){
+for(let i=0;i<5;i++){
+let o=document.createElement("div");
+o.className="obj";
+o.style.background="cyan";
+o.style.left=Math.random()*85+"vw";
+o.style.top=Math.random()*85+"vh";
+o.onclick=()=>o.remove();
+gameArea.appendChild(o);
 }
 }
 
-// 15 FINAL
+/* 9 FOLLOW */
+function follow(){
+let o=document.createElement("div");
+o.className="obj";
+o.style.background="lime";
+
+document.onmousemove=(e)=>{
+o.style.left=e.clientX+"px";
+o.style.top=e.clientY+"px";
+};
+
+gameArea.appendChild(o);
+}
+
+/* 10 CHOOSE */
+function choose(){
+gameArea.innerHTML=`
+<button class='btn'>A</button>
+<button class='btn'>B</button>
+<button class='btn'>C</button>
+`;
+
+}
+
+/* 11 HOLD */
+function hold(){
+gameArea.innerHTML="<h3 style='text-align:center;margin-top:200px'>Удерживай</h3>";
+let t=0;
+
+gameArea.onmousedown=()=>{
+t=Date.now();
+};
+
+gameArea.onmouseup=()=>{
+alert((Date.now()-t)+" ms");
+};
+}
+
+/* 12 AIM */
+function aim(){
+let t=document.createElement("div");
+t.className="obj";
+t.onclick=()=>{t.remove();aim();};
+gameArea.appendChild(t);
+
+t.style.left=Math.random()*85+"vw";
+t.style.top=Math.random()*85+"vh";
+}
+
+/* 13 AGILITY */
+function agility(){
+let t=document.createElement("div");
+t.className="obj";
+t.style.background="orange";
+
+setInterval(()=>{
+t.style.left=Math.random()*85+"vw";
+t.style.top=Math.random()*85+"vh";
+},500);
+
+gameArea.appendChild(t);
+}
+
+/* 14 FAST */
+function fast(){
+let start=Date.now();
+gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>ЖМИ СЕЙЧАС</h2>";
+
+setTimeout(()=>{
+gameArea.onclick=()=>{
+let r=Date.now()-start;
+gameArea.innerHTML="<h2>"+r+" ms</h2>";
+};
+},1000);
+}
+
+/* 15 FINAL */
 function final(){
 gameArea.innerHTML=`
+<div style="text-align:center;margin-top:150px">
 <h2>Пойдешь гулять?</h2>
 <p>С меня вкусняшки ^-^</p>
 
-<button onclick="yes()" style="padding:10px;margin:5px;">Да</button>
-<button id="fakeNo" style="padding:10px;margin:5px;">Нет</button>
+<button class='btn' onclick='yes()'>Да</button>
+<button class='btn' id='no'>Нет</button>
+</div>
 `;
 
-let fakeNo=document.getElementById("fakeNo");
+let no=document.getElementById("no");
 
-fakeNo.onmouseover=()=>{
-fakeNo.style.position="absolute";
-fakeNo.style.left=Math.random()*80+"vw";
-fakeNo.style.top=Math.random()*80+"vh";
-}
+no.onmouseover=()=>{
+no.style.position="absolute";
+no.style.left=Math.random()*80+"vw";
+no.style.top=Math.random()*80+"vh";
+};
 }
 
 function yes(){
-gameArea.innerHTML="<h2>Ок 👍</h2>";
+gameArea.innerHTML="<h2 style='text-align:center;margin-top:200px'>Ок 👍</h2>";
 }
 
 </script>
