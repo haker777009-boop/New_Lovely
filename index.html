@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Для тебя 💖</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#ffe6f0,#e6f7ff,#fff);
+animation:bg 8s infinite alternate;
+}
+
+@keyframes bg{
+0%{filter:hue-rotate(0deg);}
+100%{filter:hue-rotate(25deg);}
+}
+
+.container{
+width:90%;
+max-width:500px;
+text-align:center;
+padding:20px;
+}
+
+h1{
+font-size:24px;
+color:#ff4d88;
+margin-bottom:10px;
+animation:pop 0.8s ease;
+}
+
+p{
+font-size:16px;
+color:#444;
+margin-bottom:15px;
+}
+
+@keyframes pop{
+from{transform:scale(0.5);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+.card{
+background:rgba(255,255,255,0.7);
+backdrop-filter:blur(10px);
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+animation:fade 1s ease;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+.btn{
+padding:14px 22px;
+margin:8px;
+border:none;
+border-radius:15px;
+font-size:16px;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 8px 15px rgba(0,0,0,0.1);
+}
+
+.btn:active{
+transform:scale(0.95);
+}
+
+#yes{
+background:#ff4d88;
+color:white;
+}
+
+#no{
+background:#ccc;
+position:absolute;
+}
+
+.compliment{
+margin-top:15px;
+font-size:14px;
+color:#ff4d88;
+min-height:20px;
+transition:0.3s;
+}
+
+.heart{
+width:15px;
+height:15px;
+background:red;
+position:absolute;
+transform:rotate(45deg);
+animation:fall 4s linear;
+}
+
+.heart::before,
+.heart::after{
+content:"";
+width:15px;
+height:15px;
+background:red;
+position:absolute;
+border-radius:50%;
+}
+
+.heart::before{top:-8px;left:0;}
+.heart::after{left:-8px;top:0;}
+
+@keyframes fall{
+from{top:-50px;}
+to{top:110vh;}
+}
+
+.screen{
+display:none;
+}
+
+.active{
+display:block;
+}
+
+.final{
+display:none;
+text-align:center;
+}
+
+.bigText{
+font-size:20px;
+color:#333;
+margin:15px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- 1 экран -->
+<div class="screen active" id="screen1">
+<div class="card">
+<h1>Привет 💖</h1>
+<p>Я сделал кое-что для тебя…</p>
+
+<button class="btn" id="yes">Начать 💕</button>
+<button class="btn" id="no">Нет 😏</button>
+
+<div class="compliment" id="compliment"></div>
+</div>
+</div>
+
+<!-- 2 экран -->
+<div class="screen" id="screen2">
+<div class="card">
+<h1>Мини-игра 💘</h1>
+<p>Лови сердечки (нажимай на них)</p>
+<div class="bigText">Ты очень важна для меня ✨</div>
+</div>
+</div>
+
+<!-- финал -->
+<div class="screen" id="screen3">
+<div class="card final">
+<h1>💖 Финал 💖</h1>
+<div class="bigText">
+Пойдешь на этих каникулах гулять со мной?<br>
+С меня вкусняшки ^-^
+</div>
+
+<button class="btn" id="yesFinal">Да 💖</button>
+<button class="btn" id="noFinal">Нет 😏</button>
+</div>
+</div>
+
+</div>
+
+<script>
+
+const compliments = [
+"Ты очень красивая ✨",
+"С тобой приятно даже молчать 💕",
+"Ты делаешь мир лучше 🌸",
+"У тебя классная энергетика 💫",
+"Ты особенная 💖",
+"Я рад, что ты есть 💕"
+];
+
+const complimentBox = document.getElementById("compliment");
+
+document.getElementById("yes").onclick = () => {
+nextScreen(2);
+startGame();
+};
+
+document.getElementById("no").addEventListener("mouseover", (e) => {
+e.target.style.top = Math.random()*80 + "vh";
+e.target.style.left = Math.random()*80 + "vw";
+
+complimentBox.innerText =
+compliments[Math.floor(Math.random()*compliments.length)];
+});
+
+function nextScreen(n){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById("screen"+n).classList.add("active");
+}
+
+function startGame(){
+setTimeout(()=>{
+nextScreen(3);
+},6000);
+
+setInterval(()=>{
+let heart = document.createElement("div");
+heart.classList.add("heart");
+heart.style.left = Math.random()*100 + "vw";
+document.body.appendChild(heart);
+
+setTimeout(()=>heart.remove(),4000);
+},250);
+}
+
+// финал кнопки
+const noFinal = document.getElementById("noFinal");
+
+noFinal.addEventListener("mouseover",()=>{
+noFinal.style.position="absolute";
+noFinal.style.top=Math.random()*80+"vh";
+noFinal.style.left=Math.random()*80+"vw";
+});
+
+document.getElementById("yesFinal").onclick = () => {
+document.body.innerHTML = `
+<div style="
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+font-size:26px;
+color:#ff4d88;
+background:linear-gradient(135deg,#ffe6f0,#fff);
+">
+💖 Ура 💖<br><br>
+Я буду ждать тебя ✨
+<br><br>
+<span style="font-size:18px;color:#555;">
+Ты сделала мой день лучше
+</span>
+</div>
+`;
+};
+
+</script>
+
+</body>
+</html>
